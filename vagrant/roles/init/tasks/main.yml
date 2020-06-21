@@ -1,0 +1,21 @@
+---
+  - name: install default paks
+    yum:
+      name:
+        - vim
+        - yum-utils
+        - telnet
+      state: latest
+      disable_gpg_check: true
+
+  - name: add hosts
+    copy:
+      src: files/hosts
+      dest: /etc/hosts
+
+  - name: disable SELinux
+    selinux:
+      state: disabled
+
+  - name: disable swap
+    shell: swapoff -a

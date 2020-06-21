@@ -1,0 +1,23 @@
+---
+  - name: remove old docker
+    yum:
+      name: docker*
+      state: removed
+
+  - name: add docker repo
+    shell: yum-config-manager --nogpgcheck --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+  - name: install docker
+    yum:
+      name:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+      state: latest
+      disable_gpg_check: true
+
+  - name: Make sure a docekr service is running
+    systemd:
+      state: started
+      name: docker
+      enabled: yes

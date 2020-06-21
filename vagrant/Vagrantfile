@@ -9,6 +9,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |v|
     v.memory = 2048
+    v.cpus = 2
   end
 
   config.vm.define "k8snode1" do |k8snode1|
@@ -19,7 +20,6 @@ Vagrant.configure("2") do |config|
     k8snode1.vm.provision "shell", inline: <<-SHELL
     	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD1j1A0g7ebdghBy2UX+baArSx9jzYGTS5HwqyKEniRZ49wc/P20v5HLboCW+pzf3W8GYN3wAN2yTgxczydBO30bXAFhmAwsv/WI43kPRHLlgswSTV7KZcChqc//IsLi74LDY2kxpxcfQZG4uD3ZijsATbyZYO1atBcG5o2Ufobu0FQpSAh9F7eR0mtXzMa2XA2Mt8OlWkzmM3Oz/ORdAPqt9AMLIDk5jiCsBF8qEkLvDHtgU2MwWE6JywbdEYwQ+c6cB17LnJHaoNjOnQ/6z/YLV0TBnXeDO+SwW5dm36IPC9bulBqy4q/mo9cV3Ml3qOT41HsA2fRG8FxXpMum5aD OpenSSH-rsa-import-101417" >> /home/vagrant/.ssh/authorized_keys
       sudo yum update -y
-
   	SHELL
   end
 
@@ -34,6 +34,17 @@ Vagrant.configure("2") do |config|
   	SHELL
   end
 
+  config.vm.define "k8snode3" do |k8snode3|
+    k8snode3.vm.box = "centos/7"
+    k8snode3.vm.hostname = "k8snode3"
+    k8snode3.vm.network "private_network", ip: "10.0.4.18"
+
+    k8snode3.vm.provision "shell", inline: <<-SHELL
+      sudo yum update -y
+      echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD1j1A0g7ebdghBy2UX+baArSx9jzYGTS5HwqyKEniRZ49wc/P20v5HLboCW+pzf3W8GYN3wAN2yTgxczydBO30bXAFhmAwsv/WI43kPRHLlgswSTV7KZcChqc//IsLi74LDY2kxpxcfQZG4uD3ZijsATbyZYO1atBcG5o2Ufobu0FQpSAh9F7eR0mtXzMa2XA2Mt8OlWkzmM3Oz/ORdAPqt9AMLIDk5jiCsBF8qEkLvDHtgU2MwWE6JywbdEYwQ+c6cB17LnJHaoNjOnQ/6z/YLV0TBnXeDO+SwW5dm36IPC9bulBqy4q/mo9cV3Ml3qOT41HsA2fRG8FxXpMum5aD OpenSSH-rsa-import-101417" >> /home/vagrant/.ssh/authorized_keys
+    SHELL
+  end
+
   config.vm.define "k8smaster" do |k8smaster|
     k8smaster.vm.box = "centos/7"
     k8smaster.vm.hostname = "k8smaster"
@@ -45,25 +56,8 @@ Vagrant.configure("2") do |config|
   	SHELL
   end
 
-  config.vm.define "deploy" do |deploy|
-    deploy.vm.box = "centos/7"
-    deploy.vm.hostname = "deploy"
-    deploy.vm.network "private_network", ip: "10.0.4.18"
-
-    deploy.vm.provision "file", source: "files/id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
-    deploy.vm.synced_folder "files/", "/home/vagrant"
-
-    deploy.vm.provision "shell", inline: <<-SHELL
-      sudo yum update -y
-    	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD1j1A0g7ebdghBy2UX+baArSx9jzYGTS5HwqyKEniRZ49wc/P20v5HLboCW+pzf3W8GYN3wAN2yTgxczydBO30bXAFhmAwsv/WI43kPRHLlgswSTV7KZcChqc//IsLi74LDY2kxpxcfQZG4uD3ZijsATbyZYO1atBcG5o2Ufobu0FQpSAh9F7eR0mtXzMa2XA2Mt8OlWkzmM3Oz/ORdAPqt9AMLIDk5jiCsBF8qEkLvDHtgU2MwWE6JywbdEYwQ+c6cB17LnJHaoNjOnQ/6z/YLV0TBnXeDO+SwW5dm36IPC9bulBqy4q/mo9cV3Ml3qOT41HsA2fRG8FxXpMum5aD OpenSSH-rsa-import-101417" >> /home/vagrant/.ssh/authorized_keys
-      sudo yum install -y vim git python3 python-pip
-      sudo chmod 600 /home/vagrant/.ssh/id_rsa
-      sudo pip3 install --user ansible
-  	SHELL
-
-#    deploy.vm.provision "ansible_local" do |ansible|
-#      ansible.playbook = "playbook.yml"
-#    end
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "playbook.yml"
   end
 
 end

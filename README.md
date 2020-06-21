@@ -7,7 +7,7 @@ vagrant plugin install vagrant-vbguest
 
 # to deploy
 ```
-vagrant up
+vagrant up --provider=virtualbox
 ```
 
 # to reprovision
